@@ -14,19 +14,19 @@
     apache_trace_enable: "Off"
 
   tasks:
-    - name: 1. Update apt cache safely
+    - name: "1. Update apt cache safely"
       apt:
         update_cache: yes
         cache_valid_time: 3600
 
-    - name: 2. Install Apache2 and UFW Firewall
+    - name: "2. Install Apache2 and UFW Firewall"
       apt:
         name:
           - apache2
           - ufw
         state: present
 
-    - name: 3. Enable Core Production Apache Modules (No SSL)
+    - name: "3. Enable Core Production Apache Modules (No SSL)"
       apache2_module:
         name: "{{ item }}"
         state: present
@@ -36,7 +36,7 @@
         - expires
       notify: Restart Apache
 
-    - name: 4. Create Security Hardening & Performance Config
+    - name: "4. Create Security Hardening & Performance Config"
       copy:
         dest: /etc/apache2/conf-available/security-hardening.conf
         content: |
@@ -55,22 +55,25 @@
           Header set Referrer-Policy "strict-origin-when-cross-origin"
       notify: Restart Apache
 
-    - name: 4b. Enable Security Hardening Config
+    - name: "4b. Enable Security Hardening Config"
       command: a2enconf security-hardening
       args:
         creates: /etc/apache2/conf-enabled/security-hardening.conf
       notify: Restart Apache
 
-    - name: 5. Configure Firewall (Allow SSH and Standard Web Traffic)
+    - name: "5. Configure Firewall Rules Safely"
       ufw:
         rule: allow
         name: "{{ item }}"
-        state: enabled
       loop:
         - 'OpenSSH'
         - 'Apache'
 
-    - name: 6. Deploy Custom Production Web Page
+    - name: "5b. Securely Enable UFW Firewall"
+      ufw:
+        state: enabled
+
+    - name: "6. Deploy Custom Production Web Page"
       copy:
         dest: /var/www/html/index.html
         content: |
@@ -98,7 +101,7 @@
         group: www-data
         mode: '0644'
 
-    - name: 7. Ensure Apache Service is Started & Enabled
+    - name: "7. Ensure Apache Service is Started & Enabled"
       service:
         name: apache2
         state: started
