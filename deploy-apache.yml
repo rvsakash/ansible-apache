@@ -1,4 +1,3 @@
-cat << 'EOF' > deploy-apache.yml
 ---
 - name: Deploy HTTP-Only Production Apache Web Server
   hosts: webservers
@@ -110,5 +109,5 @@ cat << 'EOF' > deploy-apache.yml
       service:
         name: apache2
         state: restarted
-EOF
+
 
