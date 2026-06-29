@@ -23,17 +23,15 @@ pipeline {
                     // 1. अगर कोड apache वाली repo से आया है
                     if (REPO_NAME == 'ansible-apache') {
                         echo "Running Apache Server Setup..."
-                        sh 'ansible-playbook install_apache.yml'
+                        sh 'ansible-playbook deploy-apache.yml'
                     } 
                     // 2. अगर कोड पैचिंग वाली किसी भी repo से आया है
                     else if (REPO_NAME == 'ansible-patch-automation' || REPO_NAME == 'ansible-patch-repo') {
                         echo "Running OS Patching Automation..."
-                        // यहाँ अपनी पैचिंग वाली प्लेबुक का सही नाम लिख देना भाई, जैसे patch.yml
                         sh 'ansible-playbook patch.yml' 
                     } 
-                    // 3. अगर कोई मैच न मिले
                     else {
-                        echo "No specific repository matched. Running default check."
+                        echo "No specific repository matched."
                         sh 'ansible-playbook site.yml'
                     }
                 }
