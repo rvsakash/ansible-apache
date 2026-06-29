@@ -37,10 +37,10 @@ cat << 'EOF' > deploy-apache.yml
         - expires
       notify: Restart Apache
 
-    - name: 4. Apply Security Hardening & Performance Tweaks
-      blockinfile:
-        path: /etc/apache2/apache2.conf
-        block: |
+    - name: 4. Create Security Hardening & Performance Config
+      copy:
+        dest: /etc/apache2/conf-available/security-hardening.conf
+        content: |
           # Production Hardening & Performance by Ansible
           ServerTokens {{ apache_server_tokens }}
           ServerSignature {{ apache_server_signature }}
@@ -54,6 +54,12 @@ cat << 'EOF' > deploy-apache.yml
           Header set X-Frame-Options "SAMEORIGIN"
           Header set X-Content-Type-Options "nosniff"
           Header set Referrer-Policy "strict-origin-when-cross-origin"
+      notify: Restart Apache
+
+    - name: 4b. Enable Security Hardening Config
+      command: a2enconf security-hardening
+      args:
+        creates: /etc/apache2/conf-enabled/security-hardening.conf
       notify: Restart Apache
 
     - name: 5. Configure Firewall (Allow SSH and Standard Web Traffic)
