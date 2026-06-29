@@ -61,7 +61,14 @@
         creates: /etc/apache2/conf-enabled/security-hardening.conf
       notify: Restart Apache
 
-    - name: "5. Configure Firewall Rules Safely"
+    # --- FIREWALL CONFIGURATION OPTIMIZED FOR JENKINS LOCALHOST ---
+    - name: "5. Setup Default Firewall Policies to Avoid Jenkins Lockout"
+      ufw:
+        state: enabled
+        policy: allow
+        direction: incoming
+
+    - name: "5b. Configure Specific Firewall Rules Safely"
       ufw:
         rule: allow
         name: "{{ item }}"
@@ -69,9 +76,12 @@
         - 'OpenSSH'
         - 'Apache'
 
-    - name: "5b. Securely Enable UFW Firewall"
+    - name: "5c. Explicitly Allow Jenkins Port"
       ufw:
-        state: enabled
+        rule: allow
+        port: '8080'
+        proto: tcp
+    # -------------------------------------------------------------
 
     - name: "6. Deploy Custom Production Web Page"
       copy:
@@ -112,5 +122,4 @@
       service:
         name: apache2
         state: restarted
-
 
