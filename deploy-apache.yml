@@ -2,10 +2,14 @@
 - hosts: "webservers"
   connection: "local"
   become: true
+  become_method: "sudo"
+  become_flags: "-S"
   gather_facts: true
   vars: { 
     ansible_user: "hpuser",
-    ansible_password: "pass@123"
+    ansible_password: "pass@123",
+    ansible_become_user: "root",
+    ansible_become_password: "pass@123" 
   }
   tasks:
     - name: "1. Update apt cache"
