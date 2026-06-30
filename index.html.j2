@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Ansible Project</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; background: #eef2f3; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .container { background: white; padding: 50px; border-radius: 15px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); text-align: center; }
+        h1 { color: #2c3e50; font-size: 32px; margin-bottom: 20px; text-transform: capitalize; }
+        p { color: #7f8c8d; font-size: 16px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>welcome my ansible project</h1>
+        <p>Server IP: {{ ansible_default_ipv4['address'] }} | Hostname: {{ ansible_hostname }}</p>
+    </div>
+</body>
+</html>
