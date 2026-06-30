@@ -1,11 +1,10 @@
 ---
 - name: Deploy HTTP-Only Production Apache Web Server
   hosts: webservers
-  become: yes
-  gather_facts: yes
+  become: true
+  gather_facts: true
 
   vars:
-    # Production Performance Settings
     apache_keepalive: "On"
     apache_max_keepalive_requests: 150
     apache_keepalive_timeout: 3
@@ -16,7 +15,7 @@
   tasks:
     - name: "1. Update apt cache safely"
       apt:
-        update_cache: yes
+        update_cache: true
         cache_valid_time: 3600
 
     - name: "2. Install Apache2 and UFW Firewall"
@@ -26,7 +25,7 @@
           - ufw
         state: present
 
-    - name: "3. Enable Core Production Apache Modules (No SSL)"
+    - name: "3. Enable Core Production Apache Modules"
       community.general.apache2_module:
         name: "{{ item }}"
         state: present
@@ -36,25 +35,24 @@
         - expires
       notify: Restart Apache
 
-    - name: "4. Create Security Hardening & Performance Config from template"
+    - name: "4. Create Security Hardening Config"
       template:
-        src: security-hardening.conf.j2
-        dest: /etc/apache2/conf-available/security-hardening.conf
+        src: "security-hardening.conf.j2"
+        dest: "/etc/apache2/conf-available/security-hardening.conf"
       notify: Restart Apache
 
     - name: "4b. Enable Security Hardening Config"
-      command: a2enconf security-hardening
+      command: "a2enconf security-hardening"
       args:
-        creates: /etc/apache2/conf-enabled/security-hardening.conf
+        creates: "/etc/apache2/conf-enabled/security-hardening.conf"
       notify: Restart Apache
 
-    # --- FIREWALL CONFIGURATION OPTIMIZED FOR SAFETY & JENKINS ---
-    - name: "5. Set UFW default incoming policy to allow (Safe Mode)"
+    - name: "5. Set UFW default incoming policy"
       community.general.ufw:
         policy: allow
         direction: incoming
 
-    - name: "5b. Configure Specific Firewall Rules Safely"
+    - name: "5b. Configure Specific Firewall Rules"
       community.general.ufw:
         rule: allow
         name: "{{ item }}"
@@ -71,24 +69,23 @@
     - name: "5d. Enable UFW Firewall Service"
       community.general.ufw:
         state: enabled
-    # -------------------------------------------------------------
 
-    - name: "6. Deploy Custom Production Web Page from template"
+    - name: "6. Deploy Custom Production Web Page"
       template:
-        src: index.html.j2
-        dest: /var/www/html/index.html
-        owner: www-data
-        group: www-data
-        mode: '0644'
+        src: "index.html.j2"
+        dest: "/var/www/html/index.html"
+        owner: "www-data"
+        group: "www-data"
+        mode: "0644"
 
-    - name: "7. Ensure Apache Service is Started & Enabled"
+    - name: "7. Ensure Apache Service is Started"
       service:
-        name: apache2
-        state: started
-        enabled: yes
+        name: "apache2"
+        state: "started"
+        enabled: true
 
   handlers:
     - name: Restart Apache
       service:
-        name: apache2
-        state: restarted
+        name: "apache2"
+        state: "restarted"
