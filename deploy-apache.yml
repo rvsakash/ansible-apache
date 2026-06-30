@@ -106,7 +106,7 @@
           <body>
               <div class="container">
                   <h1>welcome my ansible project</h1>
-                  <p>Server IP: {{ ansible_default_ipv4.address }} | Hostname: {{ ansible_hostname }}</p>
+                  <p>Server IP: {{ ansible_default_ipv4['address'] }} | Hostname: {{ ansible_hostname }}</p>
               </div>
           </body>
           </html>
