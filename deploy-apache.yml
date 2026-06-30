@@ -2,38 +2,39 @@
 - hosts: "webservers"
   connection: "local"
   become: true
+  become_method: "sudo"
   gather_facts: true
-  vars: {
+  vars: { 
     ansible_user: "hpuser",
     ansible_password: "pass@123",
     ansible_become_user: "root",
-    ansible_become_password: "pass@123"
+    ansible_become_password: "pass@123" 
   }
   tasks:
-    - name: "1. Update apt cache"
+    - name: "1. Update apt cache safely"
       apt: { update_cache: true, cache_valid_time: 3600 }
 
-    - name: "2. Install Packages"
+    - name: "2. Install Apache2 and UFW Firewall"
       apt: { name: ["apache2", "ufw"], state: "present" }
 
-    - name: "3. Enable Modules"
+    - name: "3. Enable Core Production Apache Modules (No SSL)"
       community.general.apache2_module: { name: "{{ item }}", state: "present" }
       loop: ["rewrite", "headers", "expires"]
       notify: "Restart Apache"
 
-    - name: "4. Create Hardening Config"
+    - name: "4. Create Security Hardening & Performance Config from template"
       template: { src: "security-hardening.conf.j2", dest: "/etc/apache2/conf-available/security-hardening.conf" }
       notify: "Restart Apache"
 
-    - name: "4b. Enable Hardening Config"
+    - name: "4b. Enable Security Hardening Config"
       command: "a2enconf security-hardening"
       args: { creates: "/etc/apache2/conf-enabled/security-hardening.conf" }
       notify: "Restart Apache"
 
-    - name: "5. Set UFW Policy"
+    - name: "5. Set UFW default incoming policy to allow (Safe Mode)"
       community.general.ufw: { policy: "allow", direction: "incoming" }
 
-    - name: "5b. Configure Firewall Rules"
+    - name: "5b. Configure Specific Firewall Rules Safely"
       community.general.ufw: { rule: "allow", name: "{{ item }}" }
       loop: ["OpenSSH", "Apache"]
 
@@ -43,10 +44,10 @@
     - name: "5d. Enable UFW Firewall Service"
       community.general.ufw: { state: "enabled" }
 
-    - name: "6. Deploy Custom Production Web Page"
+    - name: "6. Deploy Custom Production Web Page from template"
       template: { src: "index.html.j2", dest: "/var/www/html/index.html", owner: "www-data", group: "www-data", mode: "0644" }
 
-    - name: "7. Ensure Apache Service is Started"
+    - name: "7. Ensure Apache Service is Started & Enabled"
       service: { name: "apache2", state: "started", enabled: true }
 
   handlers:
