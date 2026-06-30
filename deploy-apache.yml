@@ -27,7 +27,7 @@
         state: present
 
     - name: "3. Enable Core Production Apache Modules (No SSL)"
-      apache2_module:
+      community.general.apache2_module:
         name: "{{ item }}"
         state: present
       loop:
@@ -61,15 +61,14 @@
         creates: /etc/apache2/conf-enabled/security-hardening.conf
       notify: Restart Apache
 
-    # --- FIREWALL CONFIGURATION OPTIMIZED FOR JENKINS LOCALHOST ---
-    - name: "5. Setup Default Firewall Policies to Avoid Jenkins Lockout"
-      ufw:
-        state: enabled
+    # --- FIREWALL CONFIGURATION OPTIMIZED FOR SAFETY & JENKINS ---
+    - name: "5. Set UFW default incoming policy to allow (Safe Mode)"
+      community.general.ufw:
         policy: allow
         direction: incoming
 
     - name: "5b. Configure Specific Firewall Rules Safely"
-      ufw:
+      community.general.ufw:
         rule: allow
         name: "{{ item }}"
       loop:
@@ -77,10 +76,14 @@
         - 'Apache'
 
     - name: "5c. Explicitly Allow Jenkins Port"
-      ufw:
+      community.general.ufw:
         rule: allow
         port: '8080'
         proto: tcp
+
+    - name: "5d. Enable UFW Firewall Service"
+      community.general.ufw:
+        state: enabled
     # -------------------------------------------------------------
 
     - name: "6. Deploy Custom Production Web Page"
@@ -122,4 +125,3 @@
       service:
         name: apache2
         state: restarted
-
