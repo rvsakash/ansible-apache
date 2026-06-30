@@ -36,23 +36,10 @@
         - expires
       notify: Restart Apache
 
-    - name: "4. Create Security Hardening & Performance Config"
-      copy:
+    - name: "4. Create Security Hardening & Performance Config from template"
+      template:
+        src: security-hardening.conf.j2
         dest: /etc/apache2/conf-available/security-hardening.conf
-        content: |
-          # Production Hardening & Performance by Ansible
-          ServerTokens {{ apache_server_tokens }}
-          ServerSignature {{ apache_server_signature }}
-          TraceEnable {{ apache_trace_enable }}
-          KeepAlive {{ apache_keepalive }}
-          MaxKeepAliveRequests {{ apache_max_keepalive_requests }}
-          KeepAliveTimeout {{ apache_keepalive_timeout }}
-          
-          # Essential Security Headers for Non-SSL
-          Header set X-XSS-Protection "1; mode=block"
-          Header set X-Frame-Options "SAMEORIGIN"
-          Header set X-Content-Type-Options "nosniff"
-          Header set Referrer-Policy "strict-origin-when-cross-origin"
       notify: Restart Apache
 
     - name: "4b. Enable Security Hardening Config"
@@ -86,30 +73,10 @@
         state: enabled
     # -------------------------------------------------------------
 
-    - name: "6. Deploy Custom Production Web Page"
-      copy:
+    - name: "6. Deploy Custom Production Web Page from template"
+      template:
+        src: index.html.j2
         dest: /var/www/html/index.html
-        content: |
-          <!DOCTYPE html>
-          <html lang="en">
-          <head>
-              <meta charset="UTF-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>My Ansible Project</title>
-              <style>
-                  body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; background: #eef2f3; display: flex; justify-content: center; align-items: center; height: 100vh; }
-                  .container { background: white; padding: 50px; border-radius: 15px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); text-align: center; }
-                  h1 { color: #2c3e50; font-size: 32px; margin-bottom: 20px; text-transform: capitalize; }
-                  p { color: #7f8c8d; font-size: 16px; }
-              </style>
-          </head>
-          <body>
-              <div class="container">
-                  <h1>welcome my ansible project</h1>
-                  <p>Server IP: {{ ansible_default_ipv4['address'] }} | Hostname: {{ ansible_hostname }}</p>
-              </div>
-          </body>
-          </html>
         owner: www-data
         group: www-data
         mode: '0644'
