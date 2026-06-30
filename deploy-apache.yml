@@ -2,7 +2,10 @@
 - hosts: "webservers"
   become: true
   gather_facts: true
-  vars: { apache_keepalive: "On", apache_max_keepalive_requests: 150, apache_keepalive_timeout: 3, apache_server_tokens: "Prod", apache_server_signature: "Off", apache_trace_enable: "Off" }
+  vars: { 
+    ansible_user: "hpuser",
+    ansible_become_password: "pass@123" 
+  }
   tasks:
     - name: "1. Update apt cache"
       apt: { update_cache: true, cache_valid_time: 3600 }
