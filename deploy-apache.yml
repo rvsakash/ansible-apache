@@ -1,11 +1,12 @@
 ---
 - hosts: "webservers"
+  connection: "local"
   become: true
   gather_facts: true
-  vars: { 
+  vars: {
     ansible_user: "hpuser",
     ansible_password: "pass@123",
-    ansible_become_password: "pass@123" 
+    ansible_become_password: "pass@123"
   }
   tasks:
     - name: "1. Update apt cache"
