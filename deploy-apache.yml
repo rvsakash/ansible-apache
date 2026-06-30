@@ -6,6 +6,7 @@
   vars: {
     ansible_user: "hpuser",
     ansible_password: "pass@123",
+    ansible_become_user: "root",
     ansible_become_password: "pass@123"
   }
   tasks:
