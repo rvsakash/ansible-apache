@@ -1,91 +1,48 @@
 ---
-- name: "Deploy HTTP-Only Production Apache Web Server"
-  hosts: "webservers"
+- hosts: "webservers"
   become: true
   gather_facts: true
-
-  vars:
-    apache_keepalive: "On"
-    apache_max_keepalive_requests: 150
-    apache_keepalive_timeout: 3
-    apache_server_tokens: "Prod"
-    apache_server_signature: "Off"
-    apache_trace_enable: "Off"
-
+  vars: { apache_keepalive: "On", apache_max_keepalive_requests: 150, apache_keepalive_timeout: 3, apache_server_tokens: "Prod", apache_server_signature: "Off", apache_trace_enable: "Off" }
   tasks:
     - name: "1. Update apt cache"
-      apt:
-        update_cache: true
-        cache_valid_time: 3600
+      apt: { update_cache: true, cache_valid_time: 3600 }
 
     - name: "2. Install Packages"
-      apt:
-        name:
-          - "apache2"
-          - "ufw"
-        state: "present"
+      apt: { name: ["apache2", "ufw"], state: "present" }
 
     - name: "3. Enable Modules"
-      community.general.apache2_module:
-        name: "{{ item }}"
-        state: "present"
-      loop:
-        - "rewrite"
-        - "headers"
-        - "expires"
+      community.general.apache2_module: { name: "{{ item }}", state: "present" }
+      loop: ["rewrite", "headers", "expires"]
       notify: "Restart Apache"
 
     - name: "4. Create Hardening Config"
-      template:
-        src: "security-hardening.conf.j2"
-        dest: "/etc/apache2/conf-available/security-hardening.conf"
+      template: { src: "security-hardening.conf.j2", dest: "/etc/apache2/conf-available/security-hardening.conf" }
       notify: "Restart Apache"
 
     - name: "4b. Enable Hardening Config"
       command: "a2enconf security-hardening"
-      args:
-        creates: "/etc/apache2/conf-enabled/security-hardening.conf"
+      args: { creates: "/etc/apache2/conf-enabled/security-hardening.conf" }
       notify: "Restart Apache"
 
     - name: "5. Set UFW Policy"
-      community.general.ufw:
-        policy: "allow"
-        direction: "incoming"
+      community.general.ufw: { policy: "allow", direction: "incoming" }
 
     - name: "5b. Configure Firewall Rules"
-      community.general.ufw:
-        rule: "allow"
-        name: "{{ item }}"
-      loop:
-        - "OpenSSH"
-        - "Apache"
+      community.general.ufw: { rule: "allow", name: "{{ item }}" }
+      loop: ["OpenSSH", "Apache"]
 
     - name: "5c. Explicitly Allow Jenkins Port"
-      community.general.ufw:
-        rule: "allow"
-        port: "8080"
-        proto: "tcp"
+      community.general.ufw: { rule: "allow", port: "8080", proto: "tcp" }
 
     - name: "5d. Enable UFW Firewall Service"
-      community.general.ufw:
-        state: "enabled"
+      community.general.ufw: { state: "enabled" }
 
     - name: "6. Deploy Custom Production Web Page"
-      template:
-        src: "index.html.j2"
-        dest: "/var/www/html/index.html"
-        owner: "www-data"
-        group: "www-data"
-        mode: "0644"
+      template: { src: "index.html.j2", dest: "/var/www/html/index.html", owner: "www-data", group: "www-data", mode: "0644" }
 
     - name: "7. Ensure Apache Service is Started"
-      service:
-        name: "apache2"
-        state: "started"
-        enabled: true
+      service: { name: "apache2", state: "started", enabled: true }
 
   handlers:
     - name: "Restart Apache"
-      service:
-        name: "apache2"
-        state: "restarted"
+      service: { name: "apache2", state: "restarted" }
