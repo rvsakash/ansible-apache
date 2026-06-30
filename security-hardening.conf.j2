@@ -1,0 +1,13 @@
+# Production Hardening & Performance by Ansible
+ServerTokens {{ apache_server_tokens }}
+ServerSignature {{ apache_server_signature }}
+TraceEnable {{ apache_trace_enable }}
+KeepAlive {{ apache_keepalive }}
+MaxKeepAliveRequests {{ apache_max_keepalive_requests }}
+KeepAliveTimeout {{ apache_keepalive_timeout }}
+
+# Essential Security Headers for Non-SSL
+Header set X-XSS-Protection "1; mode=block"
+Header set X-Frame-Options "SAMEORIGIN"
+Header set X-Content-Type-Options "nosniff"
+Header set Referrer-Policy "strict-origin-when-cross-origin"
